@@ -1,11 +1,4 @@
-# MMDetection-based Toolbox for Semi-Supervised Object Detection
-
-## Supported algorithms
-
-- [x] STAC：[A Simple Semi-Supervised Learning Framework for Object Detection [Arxiv'20]](https://arxiv.org/abs/2005.04757v2)
-- [x] Unbiased Teacher：[Unbiased Teacher for Semi-Supervised Object Detection [ICLR'21]](https://arxiv.org/abs/2102.09480)
-- [x] Soft Teacher：[End-to-End Semi-Supervised Object Detection with Soft Teacher [ICCV'21]](https://arxiv.org/abs/2106.09018)
-- [x] LabelMatch：[Label Matching Semi-Supervised Object Detection [CVPR'22]](https://arxiv.org/pdf/2206.06608.pdf)
+# Class Distribution Prediction for Reliable Domain Adaptive Object Detection
 
 ## Preparation
 
