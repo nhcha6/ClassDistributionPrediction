@@ -21,10 +21,6 @@ Create a virtual environment using conda and the requirements.txt file. We use L
 conda env create --file conda_environment.yml
 conda activate cdp_env
 ```
-You will also have to install some additional packages that do not compile correctly with the yml file.
-```bash
-conda install -c conda-forge transformers
-```
 ## Dataset Preparation
 
 1. Download [cityscapes](https://cityscapes-dataset.com), [cityscapes-foggy](https://cityscapes-dataset.com) and [BDD100K](https://bdd-data.berkeley.edu) from the website and organize them as follows:
@@ -41,7 +37,7 @@ conda install -c conda-forge transformers
        - JPEGImages      |        - JPEGImages        |       - JPEGImages
        - Annotations     |        - Annotations       |       - Annotations 
    ```
-The datasets should follow the VOC format, with image annotations as xml files in the 'Annotations' folder and images with the same names in 'JPEGImages'.
+   - The datasets should follow the VOC format, with image annotations as xml files in the 'Annotations' folder and images with the same names in 'JPEGImages'.
 
 2. Once the datasets are in the correct format, we organise them into the three adaptation scenarios by creating dataset links. Make sure the source directory is updated for your environment. 
 
@@ -56,11 +52,11 @@ The datasets should follow the VOC format, with image annotations as xml files i
    cd tools/datasets_uda
    xonsh preprocess_dataset.sh
    ```
-   Additionally the script 'convert_xml_to_json.py' can be edited to use only a subset of a dataset when creating the json annotation file. We utilize this to split BDD100k into the daytime and night subsets.
+   - Additionally the script 'convert_xml_to_json.py' can be edited to use only a subset of a dataset when creating the json annotation file. We utilize this to split BDD100k into the daytime and night subsets.
    
 4. You can run dataset/browse_dataset.py to visualize the annotations in the json file. Firstly, edit example_config.py so that the desired dataset is referenced. Search 'TODO' to find the lines that need updating.
 
-5. Generate the CLIP image embeddings for performing class distribution prediction. This is done before self-training is run to speed up class distribution prediction. Edit 'cluster_priors/save_clip_embeddings.py' to define the desired source directory, scenario and dataset. when the script is run, the embeddings will be saved in the folder 'cluster_priors/clip_embeddings/'.
+5. Generate the CLIP image embeddings for performing class distribution prediction. This is done before self-training is run to speed up class distribution prediction. Edit 'cluster_priors/save_clip_embeddings.py' to define the desired source directory, scenario and dataset. When the script is run, the embeddings will be saved in the folder 'cluster_priors/clip_embeddings'.
 
    ```bash
    cd cluster_priors
@@ -69,57 +65,58 @@ The datasets should follow the VOC format, with image annotations as xml files i
 
 ## Training
 
-#### 1. Use labeled data to train a baseline
+1. Download the pretrained backbone ([vgg](https://www.dropbox.com/s/s3brpk0bdq60nyb/vgg16_caffe.pth?dl=0)) and save it to 'pretrained_model/backbone/'.
 
-Before training，please download the pretrained backbone ([resnet50](https://download.pytorch.org/models/resnet50-19c8e357.pth)) to `pretrained_model/backbone`.
+2. Train a model using the labeled source data only. If training to convergence, we use 48,000 iterations. However, when training to use as a checkpoint for initialising the teacher we run for 4000 iterations only. 
 
-```shell
-# |---------------------|--------|------|---------|---------|
-# | xonsh train_gpu2.sh | config | seed | percent | dataset |
-# |---------------------|--------|------|---------|---------|
-cd examples/train/xonsh
-## ---dataset: coco-standard---
-xonsh train_gpu2.sh ./configs/baseline/baseline_ssod.py 1 1 coco-standard
-## ---dataset: voc---
-# xonsh train_gpu2.sh ./configs/baseline/baseline_ssod.py 1 1 voc
-## ---dataset: coco-additional---
-# xonsh train_gpu8.sh ./configs/baseline/baseline_ssod.py 1 1 coco-additional
-```
+   ```bash
+   cd bash_scripts
+   bash train_uda_baseline.sh
+   ```
 
-- In our implementation, we use 2-gpus to train except coco-additional.
+   - You may need to change the number of GPUs in the bash script and the number of samples_per_gpu in the config file for this to work on your system. We use 1 GPU and 16 samples per GPU for training the baseline models.
+   - The scenario can be edited in the bash script.
 
-- After training, we organize the pretrained baseline to `pretrained_model/baseline` as follows：
+3. Save the resulting model to `pretrained_model/baseline` as follows：
 
-  ```shell
-  pretrained_model/
-  	└── baseline/
-          ├── instances_train2017.1@1.pth
-          ├── instances_train2017.1@5.pth
-          ├── ...
-          ├── voc.pth
-          └── coco.pth
-  ```
+   ```shell
+   pretrained_model/
+  	 └── baseline/
+           ├── C2B.pth
+   ```
+4. To train a model using LabelMatch with the original ACT, run the script 'train_labelmatch.sh'.
+   
+   ```bash
+   cd bash_scripts
+   bash train_labelmatch.sh
+   ```
+   - We use 2 GPUs and 8 samples per GPU for our experiments.
+   - The scenario can be edited in the bash script.
 
-  - You can also change the `load_from` information in `config` file in step 2.
+5. To train a model using our method, run the script 'train_labelmatch_cluster.sh'.
+   
+   ```bash
+   cd bash_scripts
+   bash train_labelmatch_cluster.sh
+   ```
+   - We use 2 GPUs and 8 samples per GPU for our experiments.
+   - The scenario can be edited in the bash script.
 
-#### 2. Use labeled data + unlabeled data to train detector
+6. Lastly, we provide a means to run class distribution prediction and visualise the results separately to self-training. Simply run the following:
 
-```shell
-## note: dataset is set to none in this step.
-cd examples/train/xonsh
-xonsh train_gpu8.sh ./configs/labelmatch/labelmatch_standard.py 1 1 none
-```
+   ```bash
+   cd cluster_priors
+   python distance_prior_regression.py --labeled_dataset C2B --unlabeled_dataset C2B --dir your_directory/class_distribution_prior/
+   ```
+   - Change the scenario using the --labeled_dataset and --unlabeled_dataset arguments.
 
-- In our implementation, we use 8-gpus to train.
-- You can also run `bash train_ssod.sh` in `examples/train/bash`
-
-### Evaluation
-
-```shell
-# please change "config" and "checkpoint" in 'eval.sh' scripts to support different dataset and trained model
-cd examples/eval
-xonsh eval.sh
-```
+## Evaluation
+We provide a script for evaluating a trained model on the validation dataset defined by a config file. Please change "config" and "checkpoint" in 'eval.sh' scripts to support different dataset and trained model.   
+   
+   ```shell 
+   cd examples/eval
+   xonsh eval.sh
+   ```
 
 ## Acknowledgements
 The following repository is built upon the MMDetection-based Toolbox for Semi-Supervised Object Detection. For more details, see the [repostitory](https://github.com/hikvision-research/SSOD) or the associated [paper](https://arxiv.org/abs/2206.06608).
