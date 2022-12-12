@@ -125,6 +125,7 @@ class ClipDistance:
             with open(f'{DIR}cluster_priors/clip_embeddings/{self.parent_dataset}_{dt}_clip_saved.csv') as f:
                 reader = csv.reader(f, delimiter=',')
                 for row in reader:
+                    print(row)
                     clip_embeddings[row[0]] = [float(i) for i in row[1:]]
 
             for name, embedding in clip_embeddings.items():
