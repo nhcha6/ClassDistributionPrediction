@@ -1,23 +1,51 @@
 # Class Distribution Prediction for Reliable Domain Adaptive Object Detection
 
-## Preparation
+The following repository is built upon the [MMDetection-based Toolbox for Semi-Supervised Object Detection](https://github.com/hikvision-research/SSOD). For more details, see this repostitory or the associated [paper](https://arxiv.org/abs/2206.06608).
 
-#### Prerequisites
+## Virtual Environment
 
+Create a virtual environment using conda and the requirements.txt file. We use Linux with Python 3.7.
 ```bash
-pip install -r requirements.txt
+conda create --name myenv --file requirements.txt
 ```
+## Dataset Preparation
 
-- Linux with Python >= 3.6
-- We use mmdet=2.10.0, pytorch=1.6.0
+1. Download [cityscapes](https://cityscapes-dataset.com), [cityscapes-foggy](https://cityscapes-dataset.com) and [BDD100K](https://bdd-data.berkeley.edu) from the website and organize them as follows:
 
-#### Data Preparation
+   ```shell
+   # cityscapes          |    # cityscapes_foggy      |   # BDD
+   /data/city            |    /data/cityscapes_foggy  |   /data/BDD
+     - VOC2007_citytrain |      - VOC2007_foggytrain  |     - VOC2007_bddtrain
+       - ImageSets       |        - ImageSets         |       - ImageSets
+       - JPEGImages      |        - JPEGImages        |       - JPEGImages
+       - Annotations     |        - Annotations       |       - Annotations 
+     - VOC2007_cityval   |      - VOC2007_foggyval    |     - VOC2007_bddval 
+       - ImageSets       |        - ImageSets         |       - ImageSets
+       - JPEGImages      |        - JPEGImages        |       - JPEGImages
+       - Annotations     |        - Annotations       |       - Annotations 
+   ```
+The datasets should follow the VOC format, with image annotations as xml files in the 'Annotations' folder and images with the same names in 'JPEGImages'.
 
-Please refer to [prepare_data.md](./docs/prepare_data.md).
+2. Once the datasets are in the correct format, we organise them into the three adaptation scenarios by creating dataset links. 
 
-## Usage
+   ```shell
+   cd tools/datasets_uda
+   xonsh create_dataset_link.sh
+   ```
 
-### Training
+3. We then convert the xml files to Coco format by running:
+
+   ```bash
+   cd tools/datasets_uda
+   xonsh preprocess_dataset.sh
+   ```
+   Additionally the script 'convert_xml_to_json.py' can be edited to use only a subset of a dataset when creating the json annotation file. We utilize this to split BDD100k into the daytime and night subsets.
+   
+4. You can run dataset/browse_dataset.py to visualize the annotations in the json file. Firstly, edit example_config.py so that the desired dataset is referenced. Search 'TODO' to find the lines that need updating.
+
+5. Generate the CLIP image embeddings for performing class distribution prediction. This is done before self-training is run to speed up class distribution prediction. Edit 'cluster_priors/save_clip_embeddings.py' to call the desired scenario and dataset, and run the python script. The embeddings will be saved in the folder 'cluster_priors/clip_embeddings/'.
+
+## Training
 
 #### 1. Use labeled data to train a baseline
 
@@ -71,40 +99,4 @@ cd examples/eval
 xonsh eval.sh
 ```
 
-## Performance
-
-#### LabelMatch
-
-| Model   | Supervision | AP   | Config | Model Weights |
-| :-------: | :-----------: | :--: | :-----------: | ------------- |
-| R50-FPN | 1%          | 25.81±0.28 | [labelmatch_standard_paper](./configs/labelmatch/labelmatch_standard_paper.py) | [To-Be-Released]() |
-| R50-FPN | 5% | 32.70±0.18 | [labelmatch_standard_paper](./configs/labelmatch/labelmatch_standard_paper.py) | [To-Be-Released]() |
-| R50-FPN | 10% | 35.49±0.17 | [labelmatch_standard_paper](./configs/labelmatch/labelmatch_standard_paper.py) | [To-Be-Released]() |
-
-- Please refer to [performance.md](./docs/performance.md) for more performance presentation.
-
-## Extension to Domain adaptive object detection
-
-Please refer to [UDA](./docs/domain_adaption.md)
-
-## Citation
-
-If you use LabelMatch in your research or wish to refer to the results published in the paper, please consider citing out paper.
-
-```BibTeX
-@inproceedings{Chen2022LabelMatching,
-    title={Label Matching Semi-Supervised Object Detection},
-    author={Binbin Chen, Weijie Chen, Shicai Yang, Yunyi Xuan, JieSong, Di Xie, Shiliang Pu, Mingli Song, Yueting Zhuang.},
-    booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-    year={2022},
-}
-```
-
-## License
-
-This project is released under the [Apache 2.0 license](./LICENSE). Other codes from open source repository follows the original distributive licenses.
-
-## Acknowledgement
-
-If you have any problem about this work, please feel free to contact Binbin Chen (chenbinbin8-at-hikvision.com) and Weijie Chen (chenweijie5-at-hikvision.com).
 
