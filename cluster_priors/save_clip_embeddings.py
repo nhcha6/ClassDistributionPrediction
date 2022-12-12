@@ -5,7 +5,7 @@ from PIL import Image
 from transformers import CLIPProcessor, CLIPVisionModel
 
 # TODO edit scenario, dataset and DIR
-DIR = '/home/nicolas/hpc-home/ssod/'
+DIR = '/home/nicolas/hpc-home/class_distribution_prediction/'
 scenario = 'C2B'
 dataset = 'labeled_data'
 
