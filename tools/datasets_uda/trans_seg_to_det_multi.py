@@ -8,8 +8,8 @@ from tqdm import tqdm
 # print(cwd)
 # os.chdir("/mnt/hpccs01/home/n11223243/ssod/")
 
-root = '/mnt/hpccs01/home/n11223243/ssod/data/cityscapes_foggy/leftImg8bit_transmittance/val/'
-xml_save_path = '/mnt/hpccs01/home/n11223243/ssod/data/city_foggy/VOC2007_cityval/Annotations'
+root = '/home/nicolas/hpc-home/ssod/data/cityscapes/gtFine/train/'
+xml_save_path = '/home/nicolas/hpc-home/ssod/data/city/VOC2007_citytrain/Annotations/'
 all_classes = ['car', 'person', 'rider', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
 class_dict = {'car': 0, 'person': 0, 'rider': 0, 'truck': 0, 'bus': 0, 'train': 0, 'motorcycle': 0, 'bicycle': 0}
 
@@ -27,6 +27,7 @@ def main():
         for tmp_vid in tqdm(tmp_listing):
             tmp_name = tmp_vid.split('.')[0]
             tmp_name = tmp_name[:-16]
+            tmp_name = tmp_name + '_leftImg8bit'
             try:
                 tmp_form = tmp_vid.split('.')[1]
             except:

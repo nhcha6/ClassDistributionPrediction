@@ -4,7 +4,10 @@ import csv
 from PIL import Image
 from transformers import CLIPProcessor, CLIPVisionModel
 
+# TODO edit scenario, dataset and DIR
 DIR = '/home/nicolas/hpc-home/ssod/'
+scenario = 'C2B'
+dataset = 'labeled_data'
 
 def run_clip(images, image_names, dataset, data_type, save_path):
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -21,7 +24,7 @@ def run_clip(images, image_names, dataset, data_type, save_path):
     print('Got Embeddings', flush=True)
 
     # open the file in the write mode
-    f = open(f'{DIR}cluster_priors/clip_embeddings/{dataset}_{data_type}_clip.csv', 'a')
+    f = open(f'{DIR}cluster_priors/clip_embeddings/{dataset}_{data_type}_clip_saved.csv', 'a')
     # create the csv writer
     writer = csv.writer(f)
     # write a row to the csv file
@@ -46,7 +49,7 @@ def save_clip_embeddings(dataset, data_type, batch_size=64):
     image_names = []
 
     # open the file in the write mode
-    f = open(f'{DIR}cluster_priors/clip_embeddings/{dataset}_{data_type}_clip.csv', 'w')
+    f = open(f'{DIR}cluster_priors/clip_embeddings/{dataset}_{data_type}_clip_saved.csv', 'w')
     f.close()
 
     # for each image
@@ -63,7 +66,7 @@ def save_clip_embeddings(dataset, data_type, batch_size=64):
         if count%batch_size == 0:
             print(count)
             # run process
-            p = Process(target=run_clip, args=(images, image_names, dataset, data_type, DIR + f'cluster_priors/clip_embeddings/{dataset}_{data_type}_clip.csv'))
+            p = Process(target=run_clip, args=(images, image_names, dataset, data_type, DIR + f'cluster_priors/clip_embeddings/{dataset}_{data_type}_clip_saved.csv'))
             p.start()
             p.join()
             # reset images
@@ -79,4 +82,4 @@ def save_clip_embeddings(dataset, data_type, batch_size=64):
 
 ##############  GENERATE CLIP EMBEDDINGS #######################
 
-save_clip_embeddings('C2F', 'unlabeled_data')
+save_clip_embeddings(scenario, dataset)

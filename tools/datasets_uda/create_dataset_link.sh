@@ -1,7 +1,7 @@
 import os
 
 # please change this to your own environment
-prefix = '/mnt/hpccs01/home/n11223243/ssod/data/'
+prefix = '/mnt/hpccs01/home/n11223243/class_distribution_prediction/data/'
 
 def create_folder(file_root):
   if not os.path.exists(file_root):
