@@ -1,6 +1,18 @@
 # Class Distribution Prediction for Reliable Domain Adaptive Object Detection
 
-The following repository is built upon the [MMDetection-based Toolbox for Semi-Supervised Object Detection](https://github.com/hikvision-research/SSOD). For more details, see this repostitory or the associated [paper](https://arxiv.org/abs/2206.06608).
+This reposository is the implementation of our paper Class Distribution Prediction for Reliable Adaptive Object Detection. 
+
+## Introduction
+
+Unsupervised domain adaptive object detection (UDA-OD) uses unlabelled data to improve the reliability of robotic vision systems in open-world environments. Previous semi-supervised learning (SSL) approaches based on Mean Teacher have been effective for UDA-OD, but the reliability of pseudo-labels remains a challenge when the labelled and unlabelled data come from different distributions. We propose changes to a recent implementation of Mean Teacher such that the contextual information available to a robot is leveraged to improve pseudo-label reliability. Our approach and how it relates to Mean Teacher and Adaptive label distribution-aware Confidence Thresholding (ACT) can be seen in the following Figure.
+
+![](hook_figure_1.5.PNG)
+
+Shown in blue, Mean Teacher enforces consistency between a student and teacher model to improve object detection performance using unlabelled data. Confident detections from the teacher on weakly augmented data are used as pseudo-labels to improve the student on strongly augmented data. The Exponential Moving Average (EMA) of the weights of the student model are used to update the teacher to make it more stable during training. Traditionally, a static confidence threshold is defined for all classes to generate pseudo-labels. Recent work proposes Adaptive label distribution-aware Confidence Thresholding (ACT) to instead align pseudo-labels with the class distribution of the labelled data. However, using the labelled class distribution as prior is not appropriate in the case of a class distribution shift. To address this issue, we propose a method (shown in green) for predicting the class ratio of the unlabelled data using a pre-trained joint vision and language model (CLIP). Furthermore, we dynamically set the number of objects per image to ensure reliable pseudo-labels under domain shift.
+
+![](class_ratio_prediction_1.2.PNG)
+
+Our method predicts the class ratio of unlabelled data using the semantic context extracted by a pre-trained joint vision and language model. This provides a weak supervision signal to improve the accuracy of pseudo-labels and ensures that contextual and class distribution shifts are explicitly accounted for in self-training. CLIP is used to calculate the similarity between the labelled images $X_{l}$, unlabelled images $X_{u}$, and a series of image classification labels $L$ of the form "a photo of class c". Using the labelled similarity scores $S_{l}$ as input features, two linear regression models are fit for each class to predict (1) the number of instances $N_{o}^{l} \cdot R_{c}^{l}$ and (2) the class ratio $R_{c}^{l}$ in each labelled image. Given the unlabelled similarity scores $S_{u}$, the regression models are used to generate the corresponding predictions for the unlabelled data. Lastly, the per image predictions of the number of instances $N_{o}^{u} \cdot R_{c}^{u}$ and class ratio $R_{c}^{u}$ are averaged and merged to generate a final prediction for the class ratio $r^{square}$.
 
 ## Virtual Environment
 
@@ -108,5 +120,8 @@ xonsh train_gpu8.sh ./configs/labelmatch/labelmatch_standard.py 1 1 none
 cd examples/eval
 xonsh eval.sh
 ```
+
+## Acknowledgements
+The following repository is built upon the MMDetection-based Toolbox for Semi-Supervised Object Detection. For more details, see the [repostitory](https://github.com/hikvision-research/SSOD) or the associated [paper](https://arxiv.org/abs/2206.06608).
 
 
