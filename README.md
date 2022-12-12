@@ -6,7 +6,12 @@ The following repository is built upon the [MMDetection-based Toolbox for Semi-S
 
 Create a virtual environment using conda and the requirements.txt file. We use Linux with Python 3.7.
 ```bash
-conda create --name myenv --file requirements.txt
+conda env create --file conda_environment.yml
+conda activate cdp_env
+```
+You will also have to install some additional packages that do not compile correctly with the yml file.
+```bash
+conda install -c conda-forge transformers
 ```
 ## Dataset Preparation
 
@@ -44,6 +49,11 @@ The datasets should follow the VOC format, with image annotations as xml files i
 4. You can run dataset/browse_dataset.py to visualize the annotations in the json file. Firstly, edit example_config.py so that the desired dataset is referenced. Search 'TODO' to find the lines that need updating.
 
 5. Generate the CLIP image embeddings for performing class distribution prediction. This is done before self-training is run to speed up class distribution prediction. Edit 'cluster_priors/save_clip_embeddings.py' to define the desired source directory, scenario and dataset. when the script is run, the embeddings will be saved in the folder 'cluster_priors/clip_embeddings/'.
+
+   ```bash
+   cd cluster_priors
+   python save_clip_embeddings.py
+   ```
 
 ## Training
 
