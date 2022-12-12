@@ -26,7 +26,7 @@ conda create --name myenv --file requirements.txt
    ```
 The datasets should follow the VOC format, with image annotations as xml files in the 'Annotations' folder and images with the same names in 'JPEGImages'.
 
-2. Once the datasets are in the correct format, we organise them into the three adaptation scenarios by creating dataset links. 
+2. Once the datasets are in the correct format, we organise them into the three adaptation scenarios by creating dataset links. Make sure the source directory is updated for your environment. 
 
    ```shell
    cd tools/datasets_uda
@@ -43,7 +43,7 @@ The datasets should follow the VOC format, with image annotations as xml files i
    
 4. You can run dataset/browse_dataset.py to visualize the annotations in the json file. Firstly, edit example_config.py so that the desired dataset is referenced. Search 'TODO' to find the lines that need updating.
 
-5. Generate the CLIP image embeddings for performing class distribution prediction. This is done before self-training is run to speed up class distribution prediction. Edit 'cluster_priors/save_clip_embeddings.py' to call the desired scenario and dataset, and run the python script. The embeddings will be saved in the folder 'cluster_priors/clip_embeddings/'.
+5. Generate the CLIP image embeddings for performing class distribution prediction. This is done before self-training is run to speed up class distribution prediction. Edit 'cluster_priors/save_clip_embeddings.py' to define the desired source directory, scenario and dataset. when the script is run, the embeddings will be saved in the folder 'cluster_priors/clip_embeddings/'.
 
 ## Training
 
