@@ -106,9 +106,9 @@ conda activate cdp_env
 
    ```bash
    cd cluster_priors
-   python distance_prior_regression.py --labeled_dataset C2B --unlabeled_dataset C2B --dir your_directory/class_distribution_prior/
+   python distance_prior_regression.py --labeled_dataset C2B --labeled_data labeled_data  --unlabeled_dataset C2B --unlabeled_data unlabeled_data --dir 'your_directory/class_distribution_prior/'
    ```
-   - Change the scenario using the --labeled_dataset and --unlabeled_dataset arguments.
+   - The input arguments to the script can be used to change the adaptation scenario.
 
 ## Evaluation
 We provide a script for evaluating a trained model on the validation dataset defined by a config file. Please change "config" and "checkpoint" in 'eval.sh' scripts to support different dataset and trained model.   
