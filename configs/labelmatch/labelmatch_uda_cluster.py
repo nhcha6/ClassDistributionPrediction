@@ -1,7 +1,7 @@
 dataset_name = data_template
 gpu = gpu_template
 total_num = 48000 * 16
-samples_per_gpu = 2
+samples_per_gpu = 8
 workers_per_gpu = 1
 total_iter = int(total_num / (samples_per_gpu * gpu))
 test_interval = 2000
@@ -163,7 +163,7 @@ labelmatch_hook_cfg = dict(
     data=dict(
         type='NewCocoDataset', img_prefix=data_root + 'unlabeled_data/',
         ann_file=data_root + f'unlabeled_data.json', classes=classes,
-        pipeline=test_pipeline, manual_length=100
+        pipeline=test_pipeline, manual_length=10000
     )
 )
 custom_hooks = [

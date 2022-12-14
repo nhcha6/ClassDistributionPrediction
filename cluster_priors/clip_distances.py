@@ -48,12 +48,10 @@ class ClipDistance:
         # get class names
         if self.parent_dataset in ['C2B', 'D2N', 'C2N', 'C2F']:
             self.classes = ['truck', 'car', 'rider', 'person', 'train', 'motorcycle', 'bicycle', 'bus']
-        elif self.parent_dataset in ['OAK', 'V2O']:
+        elif self.parent_dataset in ['OAK']:
             self.classes = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'dining table', 'dog', 'horse', 'motorbike', 'person', 'potted plant', 'sheep', 'sofa', 'train', 'monitor']
             if dataset =='OAK202':
                 self.classes = ['bicycle', 'bus', 'car', 'chair', 'dining table', 'person', 'potted plant']
-        elif self.parent_dataset in ["CLAD"]:
-            self.classes = ['Pedestrian', 'Cyclist', 'Car', 'Truck', 'Tram', 'Tricycle']
 
     def calculate_clip_distances(self, normalized_text_output, labels):
 
@@ -123,9 +121,8 @@ class ClipDistance:
 
             clip_embeddings = {}
             with open(f'{DIR}cluster_priors/clip_embeddings/{self.parent_dataset}_{dt}_clip_saved.csv') as f:
-                reader = csv.reader(f, delimiter=',')
+                reader = csv.reader(f)
                 for row in reader:
-                    print(row)
                     clip_embeddings[row[0]] = [float(i) for i in row[1:]]
 
             for name, embedding in clip_embeddings.items():

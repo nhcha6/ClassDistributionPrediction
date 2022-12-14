@@ -149,7 +149,6 @@ if __name__ == "__main__":
             parent_dataset = parent_dataset[0:i]
         else:
             break
-    print(parent_dataset)
 
     # generate subsets
     if labeled_subset:
@@ -166,16 +165,12 @@ if __name__ == "__main__":
         names_u = False
 
     # generate clusters using text labels
-    # labels = ["a photo of a street in the USA", "a photo of a street in Germany"]
     if parent_dataset in ['C2B', 'D2N', 'C2N', 'C2F']:
         labels = ["a photo of cars", "a photo of people", "a photo of bicycles", "a photo of trucks", "a photo of riders", "a photo of motorcycles", "a photo of buses"]
     elif parent_dataset in ['OAK']:
         labels = ["a photo of bicycles", "a photo of buses", "a photo of cars", "a photo of chairs", "a photo of dining tables", "a photo of people", "a photo of potted plants"]
-    elif parent_dataset in ['V2O']:
-        #['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'dining table', 'dog', 'horse', 'motorbike', 'person', 'potted plant', 'sheep', 'sofa', 'train', 'monitor']
-        labels = ["a photo of aeroplanes", "a photo of bicycles", "a photo of birds", "a photo of boats", "a photo of buses", "a photo of cars", "a photo of cats", "a photo of chairs", "a photo of cows", "a photo of dining tables", "a photo of dogs", "a photo of horses", "a photo of motorbikes", "a photo of people", "a photo of potted plants", "a photo of sheep", "a photo of sofas", "a photo of trains", "a photo of monitors"]
-    elif parent_dataset in ["CLAD"]:
-        labels = ["a photo of pedestrians", "a photo of cyclists", "a photo of cars", "a photo of trucks", "a photo of buses", "a photo of tricycles"]
+    
+    # get text embedding in multi-modal space
     normalized_text_output = text_to_projection(labels)
 
     # run classification on labeled data
@@ -196,15 +191,8 @@ if __name__ == "__main__":
     df = df.reset_index(drop=True)
     clip_distances = df[labeled_clip.labels].values
 
-    print(df)
-    print(df.describe())
-
-    # plot some linear regressions
-    # for label in labeled_clip.labels:
-    #     fig = px.scatter(df, y='car',x=label, color='dataset', trendline='ols')
-        # fig.show()
-        # fig = px.scatter(df[df['dataset']=='unlabeled'], y='car',x=label, color='cluster', trendline='ols')
-        # fig.show()
+    # print(df)
+    # print(df.describe())
 
     # predict the absolute occurence of objects
     predicted_object_frequency = regress_distances(df, labeled_clip, unlabeled_clip)
@@ -224,7 +212,6 @@ if __name__ == "__main__":
     # predict relative probability of object occurence
     prediction_relative_distribution = regress_distances(df, labeled_clip, unlabeled_clip)
     prediction_relative_distribution = np.mean(prediction_relative_distribution, axis=0)
-    # predicted_distribution = np.average(predicted_distribution, axis=0, weights=df[df['dataset']=='unlabeled']['sum'].values)
     prediction_relative_distribution = [x*sum(labeled_object_frequency)/sum(prediction_relative_distribution) for x in prediction_relative_distribution]
     prediction_relative_distribution = [0.01 if x<=0 else x for x in prediction_relative_distribution]
     scale_2 = [prediction_relative_distribution[i]/labeled_object_frequency[i] for i in range(len(prediction_relative_distribution))]
@@ -240,48 +227,31 @@ if __name__ == "__main__":
     predicted_distribution_squared = [0.01 if x<=0 else x for x in predicted_distribution_squared]
     predicted_distribution_squared = [x/sum(predicted_distribution_squared) for x in predicted_distribution_squared]
 
+    # store class ratios as list for displaying results
     priors = [unlabeled_object_frequency, predicted_object_frequency, prediction_relative_distribution, labeled_object_frequency]
-    names = ['unlabeled_distribution','prediction_absolute_occurrence','prediction_relative_occurrence', 'labeled_distribution']   
-    # plot_class_distribution(names, priors, labeled_clip.classes)
+    names = ['unlabeled_distribution','instances_per_img_prediction','class_ratio_prediction', 'labeled_distribution']
+
 
     # normalize each prior
     norm_priors = []
     for prior in priors:
         norm_priors.append([x/sum(prior) for x in prior])
-    names = ['unlabeled_distribution','absolute_occurence_prediction','relative_occurence_prediction', 'labeled_distribution']
+    
+    # plot priors
     if plot:   
         plot_class_distribution(names, norm_priors, labeled_clip.classes)
-
-    if plot:
         priors = [norm_priors[0], predicted_distribution_squared, predicted_distribution_mean, norm_priors[3]]
-        names = ['unlabeled_distribution','squared prediction', 'mean prediction', 'labeled_distribution']   
+        names = ['unlabeled_distribution','squared prediction', 'merged prediction', 'labeled_distribution']   
         plot_class_distribution(names, priors, labeled_clip.classes)
-
-    # write to file
-    if parent_dataset in ['C2B', 'D2N', 'C2N', 'C2F']:
-        test = 'driving'
-    elif parent_dataset in ['OAK', 'V2O']:
-        test = 'OAK'
-    elif parent_dataset == 'CLAD':
-        test = 'CLAD'
-    f = open(f'{DIR}cluster_priors/results/class_distribution_prediction_{test}.csv', 'a')
-    # create the csv writer
-    writer = csv.writer(f)
-    writer.writerow([labeled_dataset, labeled_data, labeled_subset, unlabeled_dataset, unlabeled_data, unlabeled_subset])
-    writer.writerow(labeled_object_frequency)
-    writer.writerow(unlabeled_object_frequency)
-    writer.writerow(prediction_relative_distribution)
-    writer.writerow(predicted_object_frequency)
-    f.close()
 
     # calculate distances
     distribution_shift = KL(norm_priors[0], norm_priors[3])
     prediction_error = KL(norm_priors[0], predicted_distribution_mean)
     scaled_error = KL(norm_priors[0], predicted_distribution_squared)
 
-    # calculate distance
+    # print distances between distributions
     print('DIFFERENCE BETWEEN LABELED AND UNLABELED: ', distribution_shift)
-    print('PREDICTION ERROR: ', prediction_error)
+    print('MERGED ERROR: ', prediction_error)
     print('SQUARED ERROR: ', scaled_error)
 
     # write the prediction to file for use in uda
