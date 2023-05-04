@@ -1,6 +1,6 @@
 # Class Distribution Prediction for Reliable Domain Adaptive Object Detection
 
-This reposository is the implementation of our [paper](https://arxiv.org/pdf/2302.06039.pdf) Class Distribution Prediction for Reliable Domain Adaptive Object Detection. 
+This reposository is the implementation of our [paper](https://arxiv.org/pdf/2302.06039.pdf) Class Distribution Prediction for Reliable Domain Adaptive Object Detection. To skip straight to the implementation details, click [here](#implementation-details).
 
 ## Motivation
 
@@ -42,6 +42,8 @@ We also investigate the regression models to ascertain why the squared predictio
 ![](intercept_plot.png)
 
 We find that the intercept coefficients of the regression models vary significantly across datasets. This implies that the class ratio is influenced by exogenous factors not captured by the CLIP similarity scores. As a result, a model fit to the labelled data will consistently be in error when making predictions on the shifted, unlabelled data. However, this intercept error is strongly correlated with the class distribution shift between the datasets ($r = 0.98$). Thus, by predicting the relative change in class ratio between datasets, we are indirectly estimating the intercept error. Scaling up the predicted change in class ratio therefore improves accuracy by incorporating this prediction of the intercept error into our method. 
+
+# Implementation Details
 
 ## Virtual Environment
 
