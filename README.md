@@ -22,6 +22,8 @@ We test our method on the following UDA-OD scenarios:
 * Adaptation from normal to foggy weather (C2F): this commonly studies scenario used Cityscapes as the source domain and Foggy Cityscapes as the target domain.
 * Adaptation from daytime to night (C2N): to study more extreme class distribution shift, we utilise Cityscapes as the source domain and BDD100k night as the target domain.
 
+Our approach returns state-of-the-art performance on these scenarios:
+
 |              | C2B (mAP) | C2N (mAP) | C2F (mAP) |
 | --------     | -------   | -------   | -------   |
 | Source only  | 20.6      |    3.8    |    24.8   |
@@ -31,15 +33,15 @@ We test our method on the following UDA-OD scenarios:
 ## Additional Ablations
 We include here additional results that are supplementary to the released paper. We have conducted additional studies that motivate the use of the merged and squared prediction in our method. Firstly, we present the following figure comparing the class distribution prediction accuracy of the relative and absolute regression models. This figure is identical to Figure 4 in our [paper](https://arxiv.org/pdf/2302.06039.pdf), with the addition of the relative model accuracy in orange and the absolute model accuracy in purple. 
 
-![](g_k_ablations.4.PNG)
+![](g_k_ablations.png)
 
 The absolute and relative regression models produce distinct predictions for the class ratio, either of which can be used by our framework. It can be seen in the above ablations that neither prediction is consistently more accurate than the other across the driving scenarios. For example, the relative model performs extremely well on the Cityscapes to BDD100k daytime example, but relatively poorly on the BDD100k night to Cityscapes scenario. Furthermore, it cannot be determined which model will perform optimally on a given scenario without access to labelled target data. We therefore average the output of the two models to produce the merged prediction, the accuracy of which tends to fall between that of the absolute and relative models. This prediction thus exhibits much more consistent performance across all scenarios without sacrificing accuracy. This consistency ultimately allows us to offer a stronger guarantee that our framework will perform well on novel scenarios.
 
-We also investigate the regression models to ascertain why the squared prediction is consistently more accurate than the merged prediction. We find that the intercept coefficients of these models vary significantly across datasets. This implies that the class ratio is influenced by exogenous factors not captured by the CLIP similarity scores. As a result, a model fit to the labelled data will consistently be in error when making predictions on the shifted, unlabelled data. However, this intercept error is strongly correlated with the class distribution shift between the datasets ($r = 0.98$). Thus, by predicting the relative change in class ratio between datasets, we are indirectly estimating the intercept error. Scaling up the predicted change in class ratio therefore improves accuracy by incorporating this prediction of the intercept error into our method. 
+We also investigate the regression models to ascertain why the squared prediction is consistently more accurate than the merged prediction. We present here a plot showing the correlation between the intercept error of the regression models and the class distribution shift. We assess the correlation for the relative model across all combinations of the driving scenarios utilised in Figure 4 of the paper. There are seven samples per scenario, denoting the intercept error and distribution shift of each class in the datasets. 
 
-We thus present here a plot showing the correlation between the intercept error and the class distribution shift. We assess the correlation for the relative model across all combinations of the driving scenarios utilised in Figure 4. There are seven samples per scenario, denoting the intercept error and distribution shift of each class in the datasets.
+![](intercept_plot.png)
 
-![](intercept_plot.4.PNG)
+We find that the intercept coefficients of the regression models vary significantly across datasets. This implies that the class ratio is influenced by exogenous factors not captured by the CLIP similarity scores. As a result, a model fit to the labelled data will consistently be in error when making predictions on the shifted, unlabelled data. However, this intercept error is strongly correlated with the class distribution shift between the datasets ($r = 0.98$). Thus, by predicting the relative change in class ratio between datasets, we are indirectly estimating the intercept error. Scaling up the predicted change in class ratio therefore improves accuracy by incorporating this prediction of the intercept error into our method. 
 
 ## Virtual Environment
 
