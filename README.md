@@ -1,6 +1,6 @@
 # Class Distribution Prediction for Reliable Domain Adaptive Object Detection
 
-This reposository is the implementation of our [paper]([url](https://arxiv.org/pdf/2302.06039.pdf)) Class Distribution Prediction for Reliable Domain Adaptive Object Detection. 
+This reposository is the implementation of our [paper](https://arxiv.org/pdf/2302.06039.pdf) Class Distribution Prediction for Reliable Domain Adaptive Object Detection. 
 
 ## Introduction
 
