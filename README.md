@@ -30,6 +30,10 @@ Our approach returns state-of-the-art performance on these scenarios:
 | CDP (Ours)   | 39.2      |    24.2   |    47.1   |
 | Target Only  | 51.7      |    32.7   |    46.3   |
 
+The following video highlights the qualitative performance of our method:
+
+https://user-images.githubusercontent.com/20634344/236744035-7e5fd038-6f41-4f44-b026-a2951a5878c4.mp4
+
 ## Additional Ablations
 We include here additional results that are supplementary to the released paper. We have conducted additional studies that motivate the use of the merged and squared prediction in our method. Firstly, we present the following figure comparing the class distribution prediction accuracy of the relative and absolute regression models. This figure is identical to Figure 4 in our [paper](https://arxiv.org/pdf/2302.06039.pdf), with the addition of the relative model accuracy in orange and the absolute model accuracy in purple. 
 
